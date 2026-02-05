@@ -1,0 +1,5 @@
+@layer components {
+  .reg-input {
+    @apply w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-uni-blue outline-none transition-all placeholder:text-slate-300 text-sm;
+  }
+}
