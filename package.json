@@ -1,0 +1,7 @@
+"dependencies": {
+  "@supabase/auth-helpers-nextjs": "latest",
+  "@supabase/supabase-js": "latest",
+  "lucide-react": "latest",          // For icons
+  "clsx": "latest",                  // For dynamic branding classes
+  "tailwind-merge": "latest"
+}
