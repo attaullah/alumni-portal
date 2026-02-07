@@ -1,5 +1,15 @@
-module.exports = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   images: {
-    domains: ['qjvzhvcdtecrlpiiquns.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'qjvzhvcdtecrlpiiquns.supabase.co', // Replace with your actual project ID
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
-}
+};
+
+module.exports = nextConfig;

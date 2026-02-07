@@ -1,5 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-uni-blue: #1e3a8a;
+  --color-uni-maroon: #800000;
+  --color-uni-gold: #d4af37;
+}
+
+/* Your custom component classes */
 @layer components {
-  .reg-input {
-    @apply w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-uni-blue outline-none transition-all placeholder:text-slate-300 text-sm;
+  .btn-primary {
+    @apply px-6 py-2 bg-uni-blue text-white rounded-md font-semibold hover:opacity-90 transition-all shadow-md active:scale-95;
+  }
+  
+  .input-field {
+    @apply w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-uni-blue outline-none transition-all;
+  }
+
+  .card {
+    @apply bg-white p-6 rounded-xl shadow-sm border border-slate-200;
+  }
+}
+@media print {
+  /* Hide the entire React Root and all UI elements */
+  body, html, #__next, main {
+    background: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Make ONLY the printable area visible and reset its positioning */
+  #printable-area, #printable-area * {
+    visibility: visible !important;
+  }
+
+  #printable-area {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Ensure the grid doesn't add extra white space on top */
+  .card-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 5mm !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Set the physical paper margins to zero */
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  /* Force background graphics (blue and gold bars) */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

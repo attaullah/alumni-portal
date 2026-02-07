@@ -29,7 +29,7 @@ export default function AdminAlumniCard({ alumni }: { alumni: any }) {
           </style>
         </head>
         <body>
-          <div class="card">
+          <div className="card">
             ${printContent}
           </div>
           <script>
@@ -68,15 +68,15 @@ export default function AdminAlumniCard({ alumni }: { alumni: any }) {
           <div style={{ display: 'flex', padding: '12px', gap: '15px' }}>
             <img src={photoUrl} style={{ width: '0.85in', height: '1.1in', objectFit: 'cover', borderRadius: '4px', border: '2px solid #800000' }} />
             <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <h2 class="text-blue" style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{alumni.full_name}</h2>
-              <p class="text-maroon" style={{ margin: '2px 0', fontSize: '10px', fontWeight: '600' }}>{alumni.degree}</p>
+              <h2 className="text-blue" style={{ margin: 0, fontSize: '14px', fontWeight: 'bold' }}>{alumni.full_name}</h2>
+              <p className="text-maroon" style={{ margin: '2px 0', fontSize: '10px', fontWeight: '600' }}>{alumni.degree}</p>
               <p style={{ margin: 0, fontSize: '9px', color: '#666' }}>Class of {alumni.graduation_year}</p>
               <div style={{ marginTop: '8px', fontSize: '8px', color: '#999' }}>
                 ID: {alumni.id.substring(0, 10).toUpperCase()}
               </div>
             </div>
           </div>
-          <div class="bg-maroon" style={{ position: 'absolute', bottom: 0, width: '100%', height: '4px' }}></div>
+          <div className="bg-maroon" style={{ position: 'absolute', bottom: 0, width: '100%', height: '4px' }}></div>
         </div>
       </div>
     </>
