@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { 
   Users, Trash2, ShieldCheck, Search, Loader2, Printer, 
-  ExternalLink, GraduationCap, Download, BarChart3, TrendingUp, AlertCircle, Layers 
+  ExternalLink, GraduationCap, Download, BarChart3, TrendingUp, AlertCircle, Layers, Trophy ,RefreshCw 
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -25,7 +25,10 @@ export default function AdminDashboard() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
+  const [pendingStories, setPendingStories] = useState<any[]>([])
   const [selectedForPrint, setSelectedForPrint] = useState<Profile[] | null>(null)
+      const [user, setUser] = useState<any>(null) // This is the 'user' variable
+
   
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,6 +38,47 @@ export default function AdminDashboard() {
 async function fetchPendingJobs() {
   const { data } = await supabase.from('jobs').select('*').eq('is_approved', false)
   setPendingJobs(data || [])
+}
+const [stats, setStats] = useState({
+  totalAlumni: 0,
+  verifiedRatio: 0,
+  topCompanies: [] as any[],
+  deptGrowth: [] as any[]
+})
+
+async function fetchAnalytics() {
+  // Fetch all profiles for aggregation
+  const { data: profiles, error } = await supabase
+    .from('profiles')
+    .select('degree, current_company, is_verified')
+
+  if (profiles) {
+    // 1. Calculate Top Companies
+    const companies = profiles
+      .filter(p => p.current_company)
+      .reduce((acc: any, p) => {
+        acc[p.current_company] = (acc[p.current_company] || 0) + 1
+        return acc
+      }, {})
+    
+    const sortedCompanies = Object.entries(companies)
+      .sort((a: any, b: any) => b[1] - a[1])
+      .slice(0, 5)
+
+    // 2. Calculate Dept Distribution
+    const depts = profiles.reduce((acc: any, p) => {
+      const dept = p.degree || 'Other'
+      acc[dept] = (acc[dept] || 0) + 1
+      return acc
+    }, {})
+
+    setStats({
+      totalAlumni: profiles.length,
+      verifiedRatio: Math.round((profiles.filter(p => p.is_verified).length / profiles.length) * 100),
+      topCompanies: sortedCompanies,
+      deptGrowth: Object.entries(depts)
+    })
+  }
 }
 const [pendingEvents, setPendingEvents] = useState<any[]>([])
 
@@ -61,12 +105,69 @@ async function approveEvent(id: string) {
   const { error } = await supabase.from('events').update({ is_approved: true }).eq('id', id)
   if (!error) setPendingEvents(pendingEvents.filter(e => e.id !== id))
 }
+const fetchPendingStories = async () => {
+  setLoading(true); // Ensure you have a const [loading, setLoading] = useState(false)
+  const { data, error } = await supabase
+    .from('success_stories')
+    .select('*')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error("Fetch error:", error.message);
+  } else {
+    setPendingStories(data || []);
+  }
+  setLoading(false);
+};
+
+// AUTO-FETCH on Load
+useEffect(() => {
+  if (1==1) { // Ensure this is true after your admin check
+    fetchPendingStories();
+  }
+}, [ ]); // Only run when admin status is determined
+
+const handleStoryAction = async (storyId: string, action: 'approved' | 'rejected') => {
+  // 1. Optimistic UI update (remove from list immediately for smoothness)
+  const previousStories = [...pendingStories];
+  setPendingStories(prev => prev.filter(s => s.id !== storyId));
+
+  try {
+    const { error } = await supabase
+      .from('success_stories')
+      .update({ status: action })
+      .eq('id', storyId);
+
+    if (error) throw error;
+
+    alert(`Story successfully ${action}!`);
+  } catch (err: any) {
+    console.error("Update failed:", err.message);
+    alert("Error: " + err.message);
+    // 2. Rollback if it failed
+    setPendingStories(previousStories);
+  }
+};
 
   useEffect(() => {
     fetchProfiles(),
     fetchPendingJobs(),
-    fetchPendingEvents()
+    fetchPendingEvents(),
+    getUser()
+    // fetchPendingStories()
   }, [])
+
+  const isAdmin = user?.role === 'admin' // Check if the user is an admin
+  const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    }
+  useEffect(() => {
+  if (user && isAdmin) {
+    fetchPendingStories();
+  }
+}, [user, isAdmin]); // Only fetch when admin status is confirmed
   // 1. Add this function inside your AdminDashboard component
 const exportAttendees = async (event: any) => {
   setLoading(true);
@@ -289,7 +390,39 @@ async function toggleVerification(userId: string, currentStatus: boolean) {
           </div>
         </div>
 
-        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+  {/* Stat Card 1: Reach */}
+  <div className="bg-[#000080] p-6 rounded-[2rem] text-white shadow-xl shadow-blue-100">
+    <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Global Reach</p>
+    <h4 className="text-4xl font-black mt-2">{stats.totalAlumni}</h4>
+    <p className="text-xs font-bold mt-1">Registered Alumni</p>
+    <div className="mt-4 h-1 bg-white/20 rounded-full overflow-hidden">
+      <div className="h-full bg-white w-[70%]" />
+    </div>
+  </div>
+
+  {/* Stat Card 2: Verification Pulse */}
+  <div className="bg-white p-6 rounded-[2rem] border-2 border-slate-50 shadow-sm">
+    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Trust Score</p>
+    <h4 className="text-4xl font-black text-[#800000] mt-2">{stats.verifiedRatio}%</h4>
+    <p className="text-xs font-bold text-slate-500 mt-1">Verified Identities</p>
+    <div className="mt-4 h-1 bg-slate-100 rounded-full overflow-hidden">
+      <div 
+        className="h-full bg-[#800000] transition-all duration-1000" 
+        style={{ width: `${stats.verifiedRatio}%` }} 
+      />
+    </div>
+  </div>
+
+  {/* Stat Card 3: Top Employer */}
+  <div className="bg-white p-6 rounded-[2rem] border-2 border-slate-50 shadow-sm">
+    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Top Employer</p>
+    <h4 className="text-xl font-black text-slate-800 mt-2 truncate">
+      {stats.topCompanies[0]?.[0] || 'Pending Data'}
+    </h4>
+    <p className="text-xs font-bold text-slate-500 mt-1">Primary Career Destination</p>
+  </div>
+</div>
 
         {/* STATS DASHBOARD */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
@@ -530,6 +663,55 @@ async function toggleVerification(userId: string, currentStatus: boolean) {
   </div>
 </div>
           {/* add new ends here */}
+          <div className="bg-white rounded-[2rem] border-2 border-[#800000]/10 overflow-hidden shadow-sm">
+  <div className="p-6 bg-[#800000] text-white flex justify-between items-center">
+    <div className="flex items-center gap-3">
+      <Trophy size={20} />
+      <h3 className="font-black uppercase tracking-widest text-sm">Pending Success Stories</h3>
+    </div>
+    <button 
+      onClick={fetchPendingStories} 
+      className="p-2 hover:bg-white/10 rounded-full transition-colors"
+      title="Refresh Stories"
+    >
+      <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+    </button>
+  </div>
+
+  <div className="p-6">
+    {pendingStories.length === 0 ? (
+      <div className="text-center py-10 text-slate-400 italic text-sm">
+        No stories awaiting approval at this time.
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 gap-4">
+        {pendingStories.map(story => (
+          <div key={story.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex justify-between items-center">
+            <div>
+              <p className="font-black text-[#000080] text-sm uppercase">{story.title}</p>
+              <p className="text-xs text-slate-500 mt-1 line-clamp-1 italic">"{story.content}"</p>
+              <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase">By {story.full_name}</p>
+            </div>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleStoryAction(story.id, 'approved')}
+                className="bg-green-600 text-white px-4 py-2 rounded-xl font-black text-[10px] uppercase hover:bg-green-700 transition-all"
+              >
+                Approve
+              </button>
+              <button 
+                onClick={() => handleStoryAction(story.id, 'rejected')}
+                className="bg-slate-200 text-slate-500 px-4 py-2 rounded-xl font-black text-[10px] uppercase hover:bg-red-50 hover:text-red-600 transition-all"
+              >
+                Decline
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+</div>
       </div>
       
     </div>

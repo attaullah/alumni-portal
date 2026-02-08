@@ -4,7 +4,8 @@ import { useEffect, useState, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { 
   Briefcase, Calendar, Users, ShieldCheck, LogOut, Menu, X, 
-  GraduationCap, User, ChevronDown, Settings 
+  GraduationCap, User, ChevronDown, Settings, 
+  QrCode, Trophy, LogIn, AlertCircle, ExternalLink
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -65,6 +66,7 @@ export default function Navbar() {
     { name: 'Directory', href: '/directory', icon: Users },
     { name: 'Jobs', href: '/jobs', icon: Briefcase },
     { name: 'Events', href: '/events', icon: Calendar },
+    { name: 'Wall of Fame', href: '/stories', icon: Trophy }, // Add this!
   ] : []
 
   return (
@@ -122,6 +124,9 @@ export default function Navbar() {
                         <ShieldCheck size={18} /> Admin Console
                       </Link>
                     )}
+
+                    <Link href="/profile/card" className="flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
+                      <QrCode size={18} /> Digital ID Card </Link>
 
                     <button 
                       onClick={() => { supabase.auth.signOut(); setIsUserDropdownOpen(false); }}
