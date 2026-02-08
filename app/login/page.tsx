@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { LogIn, Loader2, GraduationCap, AlertCircle } from 'lucide-react'
+import LoginForm from '@/components/LoginForm'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,8 +14,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
 
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const message = searchParams.get('message') // Grabs messages from the URL (like "Confirm email")
+  // const searchParams = useSearchParams()
+  // const message = searchParams.get('message') // Grabs messages from the URL (like "Confirm email")
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -68,11 +69,11 @@ export default function LoginPage() {
         </div>
 
         {/* Success messages from Registration */}
-        {message && (
+        {/* {message && (
           <div className="mb-6 p-3 bg-blue-50 border border-blue-200 text-blue-700 text-sm rounded-md flex items-center gap-2">
             <AlertCircle size={16} /> {message}
           </div>
-        )}
+        )} */}
 
         {/* Error messages */}
         {error && (
@@ -81,41 +82,14 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Email Address</label>
-            <input
-              type="email"
-              required
-              className="input-field"
-              placeholder="name@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Password</label>
-            <input
-              type="password"
-              required
-              className="input-field"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary flex justify-center items-center py-3 bg-uni-blue"
-          >
-            {loading ? <Loader2 className="animate-spin" /> : (
-              <span className="flex items-center gap-2 font-bold"><LogIn size={18} /> Sign In</span>
-            )}
-          </button>
-        </form>
+        <Suspense fallback={
+        <div className="flex flex-col items-center">
+          <Loader2 className="animate-spin text-[#000080] mb-2" />
+          <p className="text-xs font-bold text-slate-400">Loading Secure Portal...</p>
+        </div>
+      }>
+        <LoginForm />
+      </Suspense>
 
         <div className="mt-8 pt-6 border-t border-slate-100 text-center">
           <p className="text-sm text-slate-600">

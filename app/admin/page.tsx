@@ -45,6 +45,12 @@ async function approveJob(id: string) {
     // Optionally refresh the main profiles list if needed
   }
 }
+async function deleteJob(id: string) {
+  const { error } = await supabase.from('jobs').delete().eq('id', id)
+  if (!error) {
+    setPendingJobs(pendingJobs.filter(j => j.id !== id))
+  }
+}
 
 async function fetchPendingEvents() {
   const { data } = await supabase.from('events').select('*').eq('is_approved', false)
@@ -282,6 +288,8 @@ async function toggleVerification(userId: string, currentStatus: boolean) {
             </button>
           </div>
         </div>
+
+        
 
         {/* STATS DASHBOARD */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
