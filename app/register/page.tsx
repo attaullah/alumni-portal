@@ -91,7 +91,19 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
+  // Get current year for the dropdown limit
+  const currentYear = new Date().getFullYear()
+  
+  // Generate years from 2018 to Current Year
+  const years = []
+  for (let y = 2018; y <= currentYear; y++) {
+    years.push(y)
+  }
 
+  const degrees = [
+    "BSCS", "BSIT", "BSCommerce", "BBA", 
+    "BSMath", "BED", "BSENG"
+  ]
   return (
     <div className="min-h-screen bg-slate-50 py-12 px-4">
       <div className="max-w-2xl mx-auto card bg-white shadow-xl border-t-4 border-uni-blue p-8">
@@ -136,8 +148,42 @@ export default function RegisterPage() {
           {/* Academic & Professional */}
           <div className="space-y-4">
             <h3 className="font-semibold text-uni-blue flex items-center gap-2"><GraduationCap size={18}/> Education & Career</h3>
-            <input name="degree" placeholder="Degree (e.g. BSCS)" required className="input-field" onChange={handleChange} />
-            <input name="graduationYear" placeholder="Graduation Year" required className="input-field" onChange={handleChange} />
+            
+            {/* <input name="degree" placeholder="Degree (e.g. BSCS)" required className="input-field" onChange={handleChange} /> */}
+            {/* Degree Dropdown */}
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase ml-2 mb-1">
+              Degree Program
+            </label>
+            <select 
+              name="degree"
+              required
+              className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#800000] appearance-none"
+            >
+              <option value="">Select Degree</option>
+              {degrees.map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+
+            {/* <input name="graduationYear" placeholder="Graduation Year" required className="input-field" onChange={handleChange} /> */}
+          {/* Graduation Year Dropdown */}
+          <div>
+            <label className="block text-[10px] font-black text-slate-400 uppercase ml-2 mb-1">
+              Graduation Year
+            </label>
+            <select 
+              name="graduation_year"
+              required
+              className="w-full p-4 rounded-2xl bg-slate-50 border border-slate-100 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#800000] appearance-none"
+            >
+              <option value="">Select Year</option>
+              {years.reverse().map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
             <input name="jobTitle" placeholder="Current Job Title" className="input-field" onChange={handleChange} />
             <input name="company" placeholder="Company Name" className="input-field" onChange={handleChange} />
           </div>
