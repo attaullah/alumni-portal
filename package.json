@@ -22,7 +22,8 @@
     "react": "latest",
     "react-dom": "latest",
     "tailwind-merge": "latest",
-    "screenshot-desktop": "^1.0.0"
+    "screenshot-desktop": "^1.0.0",
+    "@supabase/supabase-js":"latest"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
